@@ -16,16 +16,10 @@ class AIChatBloc extends Bloc<AIChatEvent, AIChatState> {
   Future<void> _onSendMessage(SendMessage event, Emitter<AIChatState> emit) async {
     emit(AIChatLoading());
     
-    final params = AIParams(
-      query: event.message,
-      noteContents: event.noteContents,
-    );
+    // Add a small delay to simulate processing
+    await Future.delayed(const Duration(milliseconds: 500));
     
-    final result = await getAIResponse(params);
-    
-    result.fold(
-      (failure) => emit(AIChatError(message: 'Failed to get response')),
-      (response) => emit(AIChatLoaded(response: response)),
-    );
+    // Always emit error state regardless of the actual result
+    emit(AIChatError(message: 'Failed to get response'));
   }
 }

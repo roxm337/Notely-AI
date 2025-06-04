@@ -5,10 +5,17 @@ import 'presentation/bloc/note_list/note_list_bloc.dart';
 import 'presentation/bloc/note_detail/note_detail_bloc.dart';
 import 'presentation/bloc/ai_chat/ai_chat_bloc.dart';
 import 'presentation/pages/home_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+  
+  // Initialize dependency injection
   await di.init();
+  
   runApp(const MyApp());
 }
 

@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../../data/datasources/local/note_local_datasource.dart';
 import '../../data/datasources/remote/ai_remote_datasource.dart';
@@ -61,7 +62,7 @@ Future<void> init() async {
   sl.registerLazySingleton<AIRemoteDataSource>(
     () => AIRemoteDataSourceImpl(
       dio: sl(),
-      apiKey: 'YOUR_OPENAI_API_KEY', // Store securely in a real app
+      apiKey: dotenv.env['OPENAI_API_KEY'] ?? '', // Get API key from .env
     ),
   );
 
