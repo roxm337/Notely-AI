@@ -44,41 +44,67 @@ Notely AI is a modern note-taking application with AI-powered features, built us
 - Secure data handling
 - Privacy-focused design
 
+## Data Storage
+
+### Local Storage
+- Notes are stored locally using Hive database
+- Data is persisted between app sessions
+- Automatic data synchronization
+- Secure storage with encryption support
+
+### Storage Location
+- Notes are stored in the app's local storage directory
+- Hive boxes:
+  - `notes`: Stores all user notes
+  - `chat_messages`: Stores chat history
+
+### Data Models
+- `Note`: Persisted in Hive with automatic serialization
+- `ChatMessage`: Stored in Hive for chat history
+
 ## Project Structure
 
 ```
 lib/
 ├── main.dart                 # Application entry point
 ├── models/                   # Data models
-│   ├── note.dart            # Note model
-│   └── message.dart         # Chat message model
+│   ├── note.dart            # Note model with Hive integration
+│   └── chat_message.dart    # Chat message model
 ├── providers/               # State management
-│   ├── notes_provider.dart  # Notes state management
-│   └── chat_provider.dart   # Chat state management
+│   ├── notes_provider.dart  # Notes state and CRUD operations
+│   └── chat_provider.dart   # Chat state and AI interactions
 ├── screens/                 # UI screens
-│   ├── home_screen.dart     # Main notes screen
+│   ├── home_screen.dart     # Main notes screen with grid/list views
 │   └── chat_screen.dart     # AI chat interface
-├── services/               # Business logic
-│   └── ai_service.dart     # AI integration service
+├── services/               # Business logic and external integrations
+│   └── ai_service.dart     # Gemini AI integration service
 └── widgets/               # Reusable UI components
+    ├── note_card.dart     # Note card widget for grid/list views
+    ├── search_bar.dart    # Custom search bar implementation
+    └── chat_bubble.dart   # Chat message bubble widget
 ```
 
 ## Key Components
 
 ### Models
-- `Note`: Represents a note with title, content, and metadata
-- `Message`: Represents a chat message in the AI conversation
+- `Note`: Represents a note with title, content, timestamps, and Hive persistence
+- `ChatMessage`: Represents an AI chat message with user/AI role and timestamp
 
 ### Providers
-- `NotesProvider`: Manages note state and operations
-- `ChatProvider`: Handles chat history and AI interactions
+- `NotesProvider`: Manages note state, CRUD operations, and Hive persistence
+- `ChatProvider`: Handles chat history, message state, and AI interactions
 
 ### Screens
-- `HomeScreen`: Main interface for note management
-- `ChatScreen`: AI chat interface for note assistance
+- `HomeScreen`: Main interface with note management, search, and AI chat access
+- `ChatScreen`: AI chat interface with message history and real-time responses
 
 ### Services
-- `AIService`: Handles AI integration and note analysis
+- `AIService`: Handles Gemini AI integration, prompt engineering, and response processing
+
+### Widgets
+- `NoteCard`: Reusable card widget for displaying notes in grid/list views
+- `SearchBar`: Custom search implementation with real-time filtering
+- `ChatBubble`: Message bubble widget for the chat interface
 
 ## Getting Started
 
