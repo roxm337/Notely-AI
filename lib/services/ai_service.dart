@@ -13,17 +13,22 @@ class AIService {
 
   Future<void> _initialize() async {
     try {
-      final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
-      if (apiKey.isEmpty) {
-        debugPrint('Warning: Gemini API key not found in .env file');
+      final apiKey = dotenv.env['GOOGLE_API_KEY'];
+      debugPrint('Loading Gemini API key...');
+      
+      if (apiKey == null || apiKey.isEmpty) {
+        debugPrint('Error: Gemini API key is null or empty');
+        debugPrint('Current .env contents: ${dotenv.env}');
         return;
       }
 
+      debugPrint('API key found, initializing model...');
       _model = GenerativeModel(
         model: 'gemini-1.5-flash',
         apiKey: apiKey,
       );
       _isInitialized = true;
+      debugPrint('AIService initialized successfully');
     } catch (e) {
       debugPrint('Error initializing AIService: $e');
     }

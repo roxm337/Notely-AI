@@ -4,15 +4,14 @@ import 'package:notely_ai/models/chat_message.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatProvider with ChangeNotifier {
-  late Box<ChatMessage> _chatBox;
+  final Box<ChatMessage> _chatBox;
   final _uuid = const Uuid();
   
   List<ChatMessage> _messages = [];
   List<ChatMessage> get messages => _messages;
 
-  Future<void> init() async {
-    _chatBox = Hive.box<ChatMessage>('chat_messages');
-    await fetchMessages();
+  ChatProvider(this._chatBox) {
+    fetchMessages();
   }
 
   Future<void> fetchMessages() async {

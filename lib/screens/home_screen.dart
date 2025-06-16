@@ -4,6 +4,7 @@ import 'package:notely_ai/providers/notes_provider.dart';
 import 'package:notely_ai/models/note.dart';
 import 'package:notely_ai/screens/chat_screen.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:share_plus/share_plus.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -48,159 +49,169 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    final notesProvider = Provider.of<NotesProvider>(context);
     final theme = Theme.of(context);
-    final filteredNotes = _filterNotes(notesProvider.notes);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: true,
-            pinned: true,
-            stretch: true,
-            backgroundColor: theme.colorScheme.surface,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      theme.colorScheme.primary.withOpacity(0.1),
-                      theme.colorScheme.surface,
+      body: Consumer<NotesProvider>(
+        builder: (context, notesProvider, child) {
+          final filteredNotes = _filterNotes(notesProvider.notes);
+          debugPrint('Building HomeScreen with ${filteredNotes.length} notes');
+          debugPrint('Note IDs: ${filteredNotes.map((n) => n.id).toList()}');
+
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 120,
+                floating: true,
+                pinned: true,
+                stretch: true,
+                backgroundColor: theme.colorScheme.surface,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          theme.colorScheme.primary.withOpacity(0.1),
+                          theme.colorScheme.surface,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                title: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: _isSearching
+                    ? TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search notes...',
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          setState(() => _searchQuery = value);
+                        },
+                      )
+                    : const Text(
+                        'My Notes',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                ),
+                centerTitle: true,
+                actions: [
+                  IconButton(
+                    icon: Icon(_isSearching ? Icons.close : Icons.search),
+                    onPressed: () {
+                      setState(() {
+                        _isSearching = !_isSearching;
+                        if (!_isSearching) {
+                          _searchController.clear();
+                          _searchQuery = '';
+                        }
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
+                    onPressed: () {
+                      setState(() => _isGridView = !_isGridView);
+                      _animationController.forward(from: 0);
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_sweep_outlined),
+                    onPressed: () => _clearAllNotes(context),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chat_outlined),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ChatScreen()),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      _buildCategoryChip('All', true),
+                      const SizedBox(width: 8),
+                      _buildCategoryChip('Work', false),
+                      const SizedBox(width: 8),
+                      _buildCategoryChip('Personal', false),
+                      const SizedBox(width: 8),
+                      _buildCategoryChip('Ideas', false),
                     ],
                   ),
                 ),
               ),
-            ),
-            title: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: _isSearching
-                ? TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search notes...',
-                      border: InputBorder.none,
-                      hintStyle: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
-                      ),
+              if (filteredNotes.isEmpty)
+                SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.note_add_outlined,
+                          size: 64,
+                          color: theme.colorScheme.primary.withOpacity(0.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _searchQuery.isEmpty ? 'No notes yet' : 'No matching notes',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _searchQuery.isEmpty ? 'Create your first note!' : 'Try a different search term',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                        ),
+                      ],
                     ),
-                    onChanged: (value) {
-                      setState(() => _searchQuery = value);
-                    },
-                  )
-                : const Text(
-                    'My Notes',
-                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-            ),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                icon: Icon(_isSearching ? Icons.close : Icons.search),
-                onPressed: () {
-                  setState(() {
-                    _isSearching = !_isSearching;
-                    if (!_isSearching) {
-                      _searchController.clear();
-                      _searchQuery = '';
-                    }
-                  });
-                },
-              ),
-              IconButton(
-                icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
-                onPressed: () {
-                  setState(() => _isGridView = !_isGridView);
-                  _animationController.forward(from: 0);
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.chat_outlined),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ChatScreen()),
-                  );
-                },
-              ),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  _buildCategoryChip('All', true),
-                  const SizedBox(width: 8),
-                  _buildCategoryChip('Work', false),
-                  const SizedBox(width: 8),
-                  _buildCategoryChip('Personal', false),
-                  const SizedBox(width: 8),
-                  _buildCategoryChip('Ideas', false),
-                ],
-              ),
-            ),
-          ),
-          if (filteredNotes.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.note_add_outlined,
-                      size: 64,
-                      color: theme.colorScheme.primary.withOpacity(0.5),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      _searchQuery.isEmpty ? 'No notes yet' : 'No matching notes',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: _isGridView
+                    ? SliverMasonryGrid.count(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        itemBuilder: (context, index) {
+                          final note = filteredNotes[index];
+                          return _buildNoteCard(note, theme, true);
+                        },
+                        childCount: filteredNotes.length,
+                      )
+                    : SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final note = filteredNotes[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _buildNoteCard(note, theme, false),
+                            );
+                          },
+                          childCount: filteredNotes.length,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _searchQuery.isEmpty ? 'Create your first note!' : 'Try a different search term',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
-                      ),
-                    ),
-                  ],
                 ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: _isGridView
-                ? SliverMasonryGrid.count(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    itemBuilder: (context, index) {
-                      final note = filteredNotes[index];
-                      return _buildNoteCard(note, theme, true);
-                    },
-                    childCount: filteredNotes.length,
-                  )
-                : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final note = filteredNotes[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _buildNoteCard(note, theme, false),
-                        );
-                      },
-                      childCount: filteredNotes.length,
-                    ),
-                  ),
-            ),
-        ],
+            ],
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _createNote(context),
@@ -430,13 +441,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               title: const Text('Share'),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Implement share functionality
+                _shareNote(note);
               },
             ),
           ],
         ),
       ),
     );
+  }
+
+  void _shareNote(Note note) {
+    final text = '${note.title}\n\n${note.content}';
+    Share.share(text, subject: note.title);
   }
 
   String _formatDate(DateTime date) {
@@ -702,6 +718,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   Future<void> _deleteNote(BuildContext context, Note note) async {
+    debugPrint('Attempting to delete note with ID: ${note.id}');
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -716,7 +733,33 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () async {
+              debugPrint('User confirmed deletion of note: ${note.id}');
+              try {
+                final notesProvider = Provider.of<NotesProvider>(context, listen: false);
+                await notesProvider.deleteNote(note.id);
+                if (context.mounted) {
+                  Navigator.pop(context, true);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Note deleted successfully'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              } catch (e) {
+                debugPrint('Error during note deletion: $e');
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error deleting note: $e'),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+              }
+            },
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
@@ -725,9 +768,55 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ],
       ),
     );
+  }
+
+  Future<void> _clearAllNotes(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear All Notes'),
+        content: const Text('Are you sure you want to delete all notes? This action cannot be undone.'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Clear All'),
+          ),
+        ],
+      ),
+    );
 
     if (result == true && context.mounted) {
-      await Provider.of<NotesProvider>(context, listen: false).deleteNote(note.id);
+      try {
+        await Provider.of<NotesProvider>(context, listen: false).clearAllNotes();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('All notes have been cleared'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error clearing notes: $e'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
     }
   }
 } 

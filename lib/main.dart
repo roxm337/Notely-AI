@@ -47,10 +47,10 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => NotesProvider()..init(),
+          create: (_) => NotesProvider(notesBox)..init(),
         ),
         ChangeNotifierProvider(
-          create: (_) => ChatProvider()..init(),
+          create: (_) => ChatProvider(chatBox),
         ),
       ],
       child: MaterialApp(
