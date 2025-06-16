@@ -82,6 +82,11 @@ lib/
     ├── note_card.dart     # Note card widget for grid/list views
     ├── search_bar.dart    # Custom search bar implementation
     └── chat_bubble.dart   # Chat message bubble widget
+└── utilities/             # Utility functions and constants
+    ├── colors.dart        # App color constants
+    ├── encryptor.dart     # Data encryption utilities
+    ├── local.dart         # Local storage utilities
+    └── screen.dart        # Screen size utilities
 ```
 
 ## Key Components
