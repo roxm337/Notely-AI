@@ -2,6 +2,24 @@
 
 Notely AI is a modern note-taking application with AI-powered features, built using Flutter. It combines the simplicity of note-taking with the power of artificial intelligence to help you organize and manage your notes more effectively.
 
+## 📱 Screenshots
+
+### Home Screen
+![Home Screen](assets/screenshots/home_screen.png)
+*Main interface showing notes in grid view with search and AI chat access*
+
+### Note Creation
+![Note Creation](assets/screenshots/create_note.png)
+*Create new notes with a beautiful and intuitive interface*
+
+### AI Chat
+![AI Chat](assets/screenshots/ai_chat.png)
+*Chat with AI assistant for note analysis and suggestions*
+
+### Note Management
+![Note Management](assets/screenshots/note_management.png)
+*Manage your notes with options to edit, delete, and share*
+
 ## Features
 
 ### 📝 Note Management
