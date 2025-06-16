@@ -4,21 +4,14 @@ Notely AI is a modern note-taking application with AI-powered features, built us
 
 ## 📱 Screenshots
 
-### Home Screen
-![Home Screen](assets/screenshots/home_screen.png)
-*Main interface showing notes in grid view with search and AI chat access*
+<div align="center">
+  <img src="assets/screenshots/home_screen.png" width="200" alt="Home Screen"/>
+  <img src="assets/screenshots/create_note.png" width="200" alt="Note Creation"/>
+  <img src="assets/screenshots/ai_chat.png" width="200" alt="AI Chat"/>
+  <img src="assets/screenshots/note_management.png" width="200" alt="Note Management"/>
+</div>
 
-### Note Creation
-![Note Creation](assets/screenshots/create_note.png)
-*Create new notes with a beautiful and intuitive interface*
-
-### AI Chat
-![AI Chat](assets/screenshots/ai_chat.png)
-*Chat with AI assistant for note analysis and suggestions*
-
-### Note Management
-![Note Management](assets/screenshots/note_management.png)
-*Manage your notes with options to edit, delete, and share*
+*From left to right: Home Screen, Note Creation, AI Chat, and Note Management interfaces*
 
 ## Features
 
